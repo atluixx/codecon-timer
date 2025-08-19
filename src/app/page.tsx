@@ -80,14 +80,22 @@ export default function Home() {
 
 	if (!hydrated)
 		return (
-			<div className="flex justify-center items-center w-screen h-screen animate-pulse font-orbitron text-2xl text-mint">
+			<div
+				className="flex justify-center items-center w-screen h-screen animate-pulse font-orbitron text-2xl text-mint"
+				aria-live="polite"
+			>
 				Loading...
 			</div>
 		);
 
 	return (
-		<div className="flex flex-col justify-center items-center w-screen h-screen text-mint font-orbitron">
-			<div className="text-8xl sm:text-[10rem] flex items-center justify-center gap-4">
+		<main className="flex flex-col justify-center items-center w-screen h-screen text-mint font-orbitron px-4">
+			<div
+				className="text-6xl sm:text-8xl md:text-[10rem] flex flex-wrap items-center justify-center gap-4 text-center"
+				role="timer"
+				aria-live="assertive"
+				aria-label={`Countdown timer: ${hours} hours, ${minutes} minutes, ${seconds} seconds`}
+			>
 				{edit ? (
 					<EditInputs
 						pad={pad}
@@ -106,13 +114,13 @@ export default function Home() {
 							Icon={TimerReset}
 							buttonColor="#ff0000"
 							transparent
-							key="reset-button"
+							aria-label="Reset timer"
 						/>
 					</div>
 				) : fullSeconds <= 10 && isRunning ? (
 					<div>{pad(seconds)}</div>
 				) : (
-					<div className="flex gap-2">
+					<div className="flex gap-2 flex-wrap justify-center">
 						<span>{pad(hours)}</span>
 						<span>:</span>
 						<span>{pad(minutes)}</span>
@@ -123,7 +131,7 @@ export default function Home() {
 			</div>
 
 			{fullSeconds > 0 && (
-				<div className="flex gap-6 mt-10 items-center">
+				<div className="flex gap-4 md:gap-6 mt-10 flex-wrap justify-center items-center">
 					{edit ? (
 						<EditButtons
 							setInputValues={applyInputValues}
@@ -142,6 +150,6 @@ export default function Home() {
 					)}
 				</div>
 			)}
-		</div>
+		</main>
 	);
 }
