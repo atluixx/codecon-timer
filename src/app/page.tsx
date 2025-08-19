@@ -1,103 +1,147 @@
-import Image from "next/image";
+'use client';
+
+import { TimerReset } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import Button from './components/Button';
+import EditButtons from './components/EditButtons';
+import EditInputs from './components/EditInputs';
+import InitialButtons from './components/InitialButtons';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+	const [fullSeconds, setFullSeconds] = useState(30);
+	const [isRunning, setIsRunning] = useState(false);
+	const [edit, setEdit] = useState(false);
+	const [hydrated, setHydrated] = useState(false);
+	const [maximized, setMaximized] = useState(false);
+	const [editHours, setEditHours] = useState(0);
+	const [editMinutes, setEditMinutes] = useState(0);
+	const [editSeconds, setEditSeconds] = useState(30);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+	useEffect(() => {
+		setHydrated(true);
+		setIsRunning(false);
+	}, []);
+
+	useEffect(() => {
+		if (isRunning && fullSeconds > 0) {
+			const interval = setInterval(() => {
+				setFullSeconds((prev) => Math.max(prev - 1, 0));
+			}, 1000);
+			return () => clearInterval(interval);
+		} else if (fullSeconds === 0) {
+			setIsRunning(false);
+		}
+	}, [isRunning, fullSeconds]);
+
+	const pad = (num: number) => String(num).padStart(2, '0');
+
+	const hours = Math.floor(fullSeconds / 3600);
+	const minutes = Math.floor((fullSeconds % 3600) / 60);
+	const seconds = fullSeconds % 60;
+
+	async function toggleFullscreen() {
+		if (!document.fullscreenElement) {
+			await document.documentElement.requestFullscreen();
+			setMaximized(true);
+		} else {
+			await document.exitFullscreen();
+			setMaximized(false);
+		}
+	}
+
+	function toggleRunning() {
+		setIsRunning((prev) => !prev);
+	}
+
+	function toggleEdit() {
+		setEdit((prev) => {
+			if (!prev) {
+				setEditHours(hours);
+				setEditMinutes(minutes);
+				setEditSeconds(seconds);
+			}
+			return !prev;
+		});
+	}
+
+	function applyInputValues() {
+		setFullSeconds(editHours * 3600 + editMinutes * 60 + editSeconds);
+		setEdit(false);
+	}
+
+	function resetTimer() {
+		setIsRunning(false);
+		setEdit(false);
+		setFullSeconds(30);
+		setEditHours(0);
+		setEditMinutes(0);
+		setEditSeconds(30);
+	}
+
+	if (!hydrated)
+		return (
+			<div className="flex justify-center items-center w-screen h-screen animate-pulse font-orbitron text-2xl text-mint">
+				Loading...
+			</div>
+		);
+
+	return (
+		<div className="flex flex-col justify-center items-center w-screen h-screen text-mint font-orbitron">
+			<div className="text-8xl sm:text-[10rem] flex items-center justify-center gap-4">
+				{edit ? (
+					<EditInputs
+						pad={pad}
+						hours={editHours}
+						minutes={editMinutes}
+						seconds={editSeconds}
+						setHours={setEditHours}
+						setMinutes={setEditMinutes}
+						setSeconds={setEditSeconds}
+					/>
+				) : fullSeconds === 0 ? (
+					<div className="flex flex-col items-center gap-4 text-red-500 animate-pulse">
+						<h1>Time is over!</h1>
+						<Button
+							onClick={resetTimer}
+							Icon={TimerReset}
+							buttonColor="#ff0000"
+							transparent
+							key="reset-button"
+						/>
+					</div>
+				) : fullSeconds <= 10 && isRunning ? (
+					<div>{pad(seconds)}</div>
+				) : (
+					<div className="flex gap-2">
+						<span>{pad(hours)}</span>
+						<span>:</span>
+						<span>{pad(minutes)}</span>
+						<span>:</span>
+						<span>{pad(seconds)}</span>
+					</div>
+				)}
+			</div>
+
+			{fullSeconds > 0 && (
+				<div className="flex gap-6 mt-10 items-center">
+					{edit ? (
+						<EditButtons
+							setInputValues={applyInputValues}
+							toggleEdit={toggleEdit}
+						/>
+					) : (
+						<InitialButtons
+							isRunning={isRunning}
+							maximized={maximized}
+							toggleEdit={toggleEdit}
+							toggleFullscreen={toggleFullscreen}
+							toggleRunning={toggleRunning}
+							setFullSeconds={setFullSeconds}
+							setIsRunning={setIsRunning}
+						/>
+					)}
+				</div>
+			)}
+		</div>
+	);
 }
